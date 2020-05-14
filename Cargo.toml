@@ -4,6 +4,14 @@ version = "0.1.0"
 authors = ["Ellie Frost <web@stillinbeta.com>"]
 edition = "2018"
 
+[dependencies]
+bytes = "0.5.4"
+
 [dependencies.tokio]
 version = "0.2.20"
 features = ["udp", "macros", "rt-threaded"]
+
+[dependencies.tokio-util]
+version = "0.3.1"
+features = ["udp", "codec"]
+
