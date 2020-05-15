@@ -1,4 +1,3 @@
-mod errors;
-mod message;
-
-pub(crate) const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub mod errors;
+pub mod message;
+pub mod packet;

@@ -56,8 +56,9 @@ fn split_header(line: &str) -> Result<(String, String), Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::message::PacketType;
+    use crate::packet::PacketType;
     const NOTIFY_EXAMPLE: &[u8] = include_bytes!("testdata/notify.bin");
+    const M_SEARCH_EXAMPLE: &[u8] = include_bytes!("testdata/msearch.bin");
 
     #[test]
     fn test_parse_notify() {
@@ -78,5 +79,25 @@ mod tests {
                 ]
             )
         );
+    }
+
+    #[test]
+    fn test_parse_m_search() {
+        let mut buf = BytesMut::from(M_SEARCH_EXAMPLE);
+        let decoded = SSDPDecoder {}.decode(&mut buf).unwrap().unwrap();
+
+        assert_eq!(
+            decoded,
+            Packet::new_from_literal(
+                PacketType::MSearch,
+                vec![
+                    ("host", "239.255.255.250:1900"),
+                    ("man", "\"ssdp:discover\""),
+                    ("mx", "1"),
+                    ("st", "urn:dial-multiscreen-org:service:dial:1"),
+                    ("user-agent", "Chromium/81.0.4044.138 Linux"),
+                ],
+            )
+        )
     }
 }
