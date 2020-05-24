@@ -4,6 +4,7 @@ pub enum Error {
     MissingHeader(&'static str),
     IO(std::io::Error),
     Fmt(std::fmt::Error),
+    UnknownPacket, // TODO EKF more descriptive
 }
 
 impl From<std::io::Error> for Error {

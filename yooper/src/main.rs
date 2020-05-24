@@ -2,16 +2,14 @@ use std::error::Error;
 use std::net::Ipv4Addr;
 use tokio::net::UdpSocket;
 
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-const OS: &'static str = "linux"; //TODO
+// const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+// const OS: &'static str = "linux"; //TODO
 const SSDP_ADDRESS: Ipv4Addr = Ipv4Addr::new(239, 255, 255, 250);
 const SSDP_PORT: u16 = 1900;
 
 const WLAN_IP: Ipv4Addr = Ipv4Addr::new(192, 168, 7, 212);
 
 const MAX_DATAGRAM_SIZE: usize = 65_507;
-
-const UUID: &str = "6262ef8c-c0e2-4a6a-b4ab-37d07792f996";
 
 // M-SEARCH * HTTP/1.1
 //     HOST: 239.255.255.250:1900

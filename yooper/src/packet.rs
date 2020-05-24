@@ -14,7 +14,9 @@ pub use yooper_derive::*;
 pub(crate) const REQUEST_LINE_NOTIFY: &str = "NOTIFY * HTTP/1.1";
 pub(crate) const REQUEST_LINE_M_SEARCH: &str = "M-SEARCH * HTTP/1.1";
 pub(crate) const REQUEST_LINE_OK: &str = "HTTP/1.1 200 OK";
+#[allow(dead_code)]
 pub(crate) const SSDP_ADDRESS: Ipv4Addr = Ipv4Addr::new(239, 255, 255, 250);
+#[allow(dead_code)]
 pub(crate) const SSDP_PORT: u16 = 1900;
 
 #[derive(PartialEq, Debug)]
@@ -49,8 +51,8 @@ impl FromStr for PacketType {
 
 #[derive(PartialEq, Debug)]
 pub struct Packet {
-    typ: PacketType,
-    headers: HashMap<String, String>,
+    pub typ: PacketType,
+    pub headers: HashMap<String, String>,
 }
 
 impl Packet {
@@ -61,13 +63,6 @@ impl Packet {
             .map(|(k, v)| (k.into(), v.into()))
             .collect();
         Self { typ, headers }
-    }
-
-    fn header_or_error(&self, key: &'static str) -> Result<String, Error> {
-        self.headers
-            .get(key)
-            .ok_or(Error::MissingHeader(key))
-            .map(|v| v.into())
     }
 }
 
@@ -94,6 +89,6 @@ impl TryFrom<Packet> for Message {
     }
 }
 
-trait FromPacket: std::marker::Sized {
+pub trait FromPacket: std::marker::Sized {
     fn from_packet(msg: &Packet) -> Result<Self, crate::errors::Error>;
 }
