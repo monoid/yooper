@@ -1,6 +1,10 @@
+use std::convert::Infallible;
+use std::num::ParseIntError;
+
 #[derive(Debug)]
 pub enum Error {
     ParseFailure(String),
+    ParseIntError(ParseIntError),
     MissingHeader(&'static str),
     IO(std::io::Error),
     Fmt(std::fmt::Error),
@@ -22,5 +26,17 @@ impl From<std::fmt::Error> for Error {
 impl From<&str> for Error {
     fn from(source: &str) -> Self {
         Error::ParseFailure(source.into())
+    }
+}
+
+impl From<ParseIntError> for Error {
+    fn from(e: ParseIntError) -> Self {
+        Error::ParseIntError(e)
+    }
+}
+
+impl From<Infallible> for Error {
+    fn from(_: Infallible) -> Self {
+        unreachable!()
     }
 }

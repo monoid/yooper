@@ -121,11 +121,11 @@ impl ToTokens for VariantMember {
 
         let q = if self.optional {
             quote! {
-                #ident: packet.headers.get(#header).map_or(Ok(None), || v.parse::<Result<Option<_>, crate::Error>>)?
+                #ident: packet.headers.get(#header).map_or(Ok(None), |v| v.parse().map(Some))?
             }
         } else {
             quote! {
-                #ident: packet.headers.get(#header).ok_or_else(|| crate::Error::MissingHeader(#header))?.into()
+                #ident: packet.headers.get(#header).ok_or_else(|| crate::Error::MissingHeader(#header))?.parse()?
             }
         };
         tokens.extend(q)
@@ -187,6 +187,5 @@ fn derive_message_impl(input: DeriveInput) -> Result<TokenStream> {
             }
         }
     };
-    eprintln!("TOKENS: {}", tokens);
     Ok(tokens)
 }
