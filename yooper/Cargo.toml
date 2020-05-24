@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 bytes = "0.5.4"
+yooper_derive = { path = "../yooper_derive" }
 
 [dependencies.tokio]
 version = "0.2.20"

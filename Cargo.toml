@@ -1,5 +1,6 @@
 [workspace]
 
 members = [
-  "yooper"
+  "yooper",
+  "yooper_derive",
 ]

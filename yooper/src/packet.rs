@@ -9,6 +9,8 @@ use std::str::FromStr;
 use crate::errors::Error;
 use crate::message::Message;
 
+pub use yooper_derive::*;
+
 pub(crate) const REQUEST_LINE_NOTIFY: &str = "NOTIFY * HTTP/1.1";
 pub(crate) const REQUEST_LINE_M_SEARCH: &str = "M-SEARCH * HTTP/1.1";
 pub(crate) const REQUEST_LINE_OK: &str = "HTTP/1.1 200 OK";
@@ -90,4 +92,8 @@ impl TryFrom<Packet> for Message {
             PacketType::Ok => Ok(Message::Unimplemented),
         }
     }
+}
+
+trait FromPacket: std::marker::Sized {
+    fn from_packet(msg: &Packet) -> Result<Self, crate::errors::Error>;
 }

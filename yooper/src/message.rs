@@ -1,5 +1,8 @@
-#[derive(Debug, PartialEq)]
+use crate::packet::FromPacket;
+
+#[derive(Debug, PartialEq, FromPacket, Default)]
 pub enum Message {
+    #[message(reqline = "MSearch")]
     MSearch {
         /// Maximum wait time in seconds. shall be greater than or equal to 1 and should
         /// be less than 5 inclusive.
@@ -23,6 +26,7 @@ pub enum Message {
         /// in devices also apply for control points.
         uuid: Option<String>,
     },
+    #[message(reqline = "Notify", sts = "ssdp:alive")]
     Available {
         /// after this duration, control points should assume the device (or
         /// service)  is  no  longer  available;  as  long  as  a  control  point
@@ -57,4 +61,19 @@ pub enum Message {
         search_port: Option<u16>,
     },
     Unimplemented,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::packet::{Packet, PacketType::*};
+    #[test]
+    fn test_available_from_packet() {
+        let packet = Packet::new_from_literal(Notify, vec![("sts", "ssdp:available")]);
+        let expected = Message::Available {
+            ..Default::default()
+        };
+
+        assert_eq!(expected, Message::from_packet(&packet).unwrap())
+    }
 }
