@@ -5,6 +5,7 @@ use tokio_util::codec::Decoder;
 
 use super::Packet;
 
+#[derive(Default)]
 pub struct SSDPDecoder {}
 
 impl Decoder for SSDPDecoder {
@@ -57,8 +58,8 @@ fn split_header(line: &str) -> Result<(String, String), Error> {
 mod tests {
     use super::*;
     use crate::packet::PacketType;
-    const NOTIFY_EXAMPLE: &[u8] = include_bytes!("testdata/notify.bin");
-    const M_SEARCH_EXAMPLE: &[u8] = include_bytes!("testdata/msearch.bin");
+
+    use crate::tests::constants::*;
 
     #[test]
     fn test_parse_notify() {
@@ -96,6 +97,28 @@ mod tests {
                     ("mx", "1"),
                     ("st", "urn:dial-multiscreen-org:service:dial:1"),
                     ("user-agent", "Chromium/81.0.4044.138 Linux"),
+                ],
+            )
+        )
+    }
+
+    #[test]
+    fn test_parse_search_response() {
+        let mut buf = BytesMut::from(SEARCH_RESPONSE_EXAMPLE);
+        let decoded = SSDPDecoder {}.decode(&mut buf).unwrap().unwrap();
+
+        assert_eq!(
+            decoded,
+            Packet::new_from_literal(
+                PacketType::Ok,
+                vec![
+                    ("cache-control", "max-age=1800"),
+                    ("date", "Mon, 25 May 2020 02:39:02 GMT"),
+                    ("ext", ""),
+                    ("location", "http://192.168.7.1:1900/igd.xml"),
+                    ("server", "eeroOS/latest UPnP/1.0 eero/latest"),
+                    ("st", "uuid:fcdb9233-a63f-41da-b42c-7cfeb99c8adf"),
+                    ("usn", "uuid:fcdb9233-a63f-41da-b42c-7cfeb99c8adf")
                 ],
             )
         )

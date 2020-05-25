@@ -24,11 +24,19 @@ impl<'a> ToTokens for ToPacket<'a> {
         let field_names = fields.iter().map(|v| &v.ident);
         let headers = fields.iter().map(VariantMember::to_message);
 
+        let nts_header = if let Some(nts) = nts {
+            quote! {
+                headers.insert("nts".to_string(), #nts.to_string());
+            }
+        } else {
+            quote! {}
+        };
+
         tokens.extend(quote! {
             #parent::#name { #(#field_names),* } => {
                 let mut headers = std::collections::HashMap::new();
 
-                headers.insert("nts".to_string(), #nts.to_string());
+                #nts_header
                 #(#headers)*
                 crate::Packet {
                     typ: crate::PacketType::#reqline,

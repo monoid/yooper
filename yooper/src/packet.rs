@@ -7,6 +7,8 @@ use std::str::FromStr;
 
 use crate::errors::Error;
 
+pub use decoder::SSDPDecoder;
+pub use encoder::SSDPEncoder;
 pub use yooper_derive::*;
 
 pub(crate) const REQUEST_LINE_NOTIFY: &str = "NOTIFY * HTTP/1.1";

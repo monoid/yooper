@@ -1,0 +1,9 @@
+HTTP/1.1 200 OK
+CACHE-CONTROL: max-age=1800
+DATE: Mon, 25 May 2020 02:39:02 GMT
+EXT:
+LOCATION: http://192.168.7.1:1900/igd.xml
+SERVER: eeroOS/latest UPnP/1.0 eero/latest
+ST: uuid:fcdb9233-a63f-41da-b42c-7cfeb99c8adf
+USN: uuid:fcdb9233-a63f-41da-b42c-7cfeb99c8adf
+

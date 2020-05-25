@@ -5,6 +5,7 @@ use super::Packet;
 use crate::errors::Error;
 use std::fmt::Write;
 
+#[derive(Default)]
 pub struct SSDPEncoder {}
 
 impl Encoder<Packet> for SSDPEncoder {
