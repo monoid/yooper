@@ -17,7 +17,7 @@ fn available_packet() -> Packet {
 }
 
 fn available() -> Message {
-    Message::Available {
+    Message::Available(Available {
         max_age: "max-age=3600".into(),
         location: "http://192.168.7.238:54216/RootDevice.xml".into(),
         notification_type: "urn:schemas-upnp-org:device:MediaServer:1".into(),
@@ -31,7 +31,7 @@ fn available() -> Message {
         boot_id: None,
         config_id: None,
         search_port: Some(11120),
-    }
+    })
 }
 
 #[test]

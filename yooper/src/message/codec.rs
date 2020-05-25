@@ -37,7 +37,7 @@ impl Encoder<Message> for SSDPMessageEncoder {
 
 #[cfg(test)]
 mod tests {
-    use super::super::types::Ext;
+    use super::super::{types::Ext, SearchResponse};
     use super::*;
     use crate::tests::constants::*;
 
@@ -45,7 +45,7 @@ mod tests {
     fn test_decode_ok() {
         let mut buf = BytesMut::from(SEARCH_RESPONSE_EXAMPLE);
         let mut decoder = SSDPMessageDecoder::default();
-        let message = Message::SearchResponse {
+        let message = Message::SearchResponse(SearchResponse {
             max_age: "max-age=1800".into(),
             date: Some("Mon, 25 May 2020 02:39:02 GMT".into()),
             location: "http://192.168.7.1:1900/igd.xml".into(),
@@ -58,7 +58,7 @@ mod tests {
             boot_id: None,
             config_id: None,
             search_port: None,
-        };
+        });
 
         assert_eq!(message, decoder.decode(&mut buf).unwrap().unwrap())
     }

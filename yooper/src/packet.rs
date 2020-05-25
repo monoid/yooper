@@ -49,10 +49,12 @@ impl FromStr for PacketType {
     }
 }
 
+pub type Headers = HashMap<String, String>;
+
 #[derive(PartialEq, Debug)]
 pub struct Packet {
     pub typ: PacketType,
-    pub headers: HashMap<String, String>,
+    pub headers: Headers,
 }
 
 impl Packet {
@@ -72,4 +74,12 @@ pub trait FromPacket: std::marker::Sized {
 
 pub trait ToPacket {
     fn to_packet(&self) -> Packet;
+}
+
+pub trait FromHeaders: std::marker::Sized {
+    fn from_headers(headers: &Headers) -> Result<Self, crate::errors::Error>;
+}
+
+pub trait ToHeaders {
+    fn to_headers(&self) -> Headers;
 }

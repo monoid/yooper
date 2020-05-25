@@ -1,4 +1,6 @@
-use crate::ast::{parse_variants, MessageVariant, VariantMember};
+use crate::ast::{
+    parse_header_struct, parse_variants, MessageStruct, MessageVariant, VariantMember,
+};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{DeriveInput, Result};
@@ -16,13 +18,10 @@ impl<'a> ToTokens for ToPacket<'a> {
         let MessageVariant {
             name,
             parent,
-            fields,
             reqline,
             nts,
             ..
         } = &self.0;
-        let field_names = fields.iter().map(|v| &v.ident);
-        let headers = fields.iter().map(VariantMember::to_message);
 
         let nts_header = if let Some(nts) = nts {
             quote! {
@@ -33,11 +32,9 @@ impl<'a> ToTokens for ToPacket<'a> {
         };
 
         tokens.extend(quote! {
-            #parent::#name { #(#field_names),* } => {
-                let mut headers = std::collections::HashMap::new();
-
+            #parent::#name ( field ) => {
+                let mut headers = field.to_headers();
                 #nts_header
-                #(#headers)*
                 crate::Packet {
                     typ: crate::PacketType::#reqline,
                     headers,
@@ -64,17 +61,55 @@ impl<'a> ToTokens for ToPacketField<'a> {
         } = &self.0;
         let t = if *optional {
             quote! {
-                if let Some(v) = #ident {
+                if let Some(v) = &self.#ident {
                     headers.insert(#header.to_string(), v.to_string());
                 }
             }
         } else {
             quote! {
-                headers.insert(#header.to_string(), #ident.to_string());
+                headers.insert(#header.to_string(), self.#ident.to_string());
             }
         };
         tokens.extend(t)
     }
+}
+
+struct ToHeaders<'a>(&'a MessageStruct);
+
+impl MessageStruct {
+    fn to_headers(&self) -> ToHeaders {
+        ToHeaders(&self)
+    }
+}
+
+impl<'a> ToTokens for ToHeaders<'a> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let fields = self.0.fields.iter().map(VariantMember::to_message);
+
+        tokens.extend(quote! {
+            let mut headers = std::collections::HashMap::new();
+            #(#fields)*
+            headers
+        })
+    }
+}
+
+pub fn headers(input: DeriveInput) -> Result<TokenStream> {
+    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+    let msgstruct = parse_header_struct(input.clone())?;
+    let headers = msgstruct.to_headers();
+
+    let name = input.ident;
+    let tokens = quote! {
+        #[automatically_derived]
+        impl #impl_generics crate::ToHeaders for #name #ty_generics #where_clause {
+            fn to_headers(&self) -> crate::Headers {
+                #headers
+            }
+        }
+    };
+
+    Ok(tokens)
 }
 
 pub fn derive(input: DeriveInput) -> Result<TokenStream> {

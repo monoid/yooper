@@ -1,4 +1,6 @@
-use crate::ast::{parse_variants, MessageVariant, VariantMember};
+use crate::ast::{
+    parse_header_struct, parse_variants, MessageStruct, MessageVariant, VariantMember,
+};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{DeriveInput, Result};
@@ -43,18 +45,14 @@ impl<'a> ToTokens for FromPacket<'a> {
         let MessageVariant {
             name,
             parent,
-            fields,
+            struct_name,
             ..
         } = &self.0;
-        let fields = fields.iter().map(VariantMember::from_message); // TODO
-
         let cond = self.as_from_condition();
         tokens.extend(quote! {
             if #cond {
                 return Ok(
-                    #parent::#name {
-                        #(#fields),*
-                    }
+                    #parent::#name(#struct_name::from_headers(&packet.headers)?)
                 )
             }
         });
@@ -80,16 +78,56 @@ impl<'a> ToTokens for FromPacketField<'a> {
 
         let q = if *optional {
             quote! {
-                #ident: packet.headers.get(#header).map_or(Ok(None), |v| v.parse().map(Some))?
+                #ident: headers.get(#header).map_or(Ok(None), |v| v.parse().map(Some))?
             }
         } else {
             quote! {
-                #ident: packet.headers.get(#header).ok_or_else(|| crate::Error::MissingHeader(#header))?.parse()?
+                #ident: headers.get(#header).ok_or_else(|| crate::Error::MissingHeader(#header))?.parse()?
             }
         };
 
         tokens.extend(q);
     }
+}
+
+struct FromHeaders<'a>(&'a MessageStruct);
+
+impl MessageStruct {
+    fn from_headers(&self) -> FromHeaders {
+        FromHeaders(&self)
+    }
+}
+
+impl<'a> ToTokens for FromHeaders<'a> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let fields = self.0.fields.iter().map(VariantMember::from_message);
+        let name = &self.0.name;
+
+        tokens.extend(quote! {
+           Ok(#name {
+                #(#fields),*
+           })
+        })
+    }
+}
+
+pub fn headers(input: DeriveInput) -> Result<TokenStream> {
+    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+    let msgstruct = parse_header_struct(input.clone())?;
+    let headers = msgstruct.from_headers();
+
+    let name = input.ident;
+
+    let tokens = quote! {
+        #[automatically_derived]
+        impl #impl_generics crate::FromHeaders for #name #ty_generics #where_clause {
+
+            fn from_headers(headers: &crate::Headers) -> Result<Self, crate::errors::Error> {
+                #headers
+            }
+        }
+    };
+    Ok(tokens)
 }
 
 pub fn derive(input: DeriveInput) -> Result<TokenStream> {
