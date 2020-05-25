@@ -3,15 +3,15 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{DeriveInput, Result};
 
-struct ToMessage<'a>(&'a MessageVariant);
+struct ToPacket<'a>(&'a MessageVariant);
 
 impl MessageVariant {
-    fn to_message<'a>(&'a self) -> ToMessage<'a> {
-        ToMessage(&self)
+    fn to_message(&self) -> ToPacket {
+        ToPacket(&self)
     }
 }
 
-impl<'a> ToTokens for ToMessage<'a> {
+impl<'a> ToTokens for ToPacket<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let MessageVariant {
             name,
@@ -22,7 +22,7 @@ impl<'a> ToTokens for ToMessage<'a> {
             ..
         } = &self.0;
         let field_names = fields.iter().map(|v| &v.ident);
-        let headers = fields.into_iter().map(VariantMember::to_message);
+        let headers = fields.iter().map(VariantMember::to_message);
 
         tokens.extend(quote! {
             #parent::#name { #(#field_names),* } => {
@@ -40,14 +40,14 @@ impl<'a> ToTokens for ToMessage<'a> {
 }
 
 impl VariantMember {
-    fn to_message<'a>(&'a self) -> ToMessageField<'a> {
-        ToMessageField(&self)
+    fn to_message(&self) -> ToPacketField {
+        ToPacketField(&self)
     }
 }
 
-struct ToMessageField<'a>(&'a VariantMember);
+struct ToPacketField<'a>(&'a VariantMember);
 
-impl<'a> ToTokens for ToMessageField<'a> {
+impl<'a> ToTokens for ToPacketField<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let VariantMember {
             optional,
@@ -71,7 +71,7 @@ impl<'a> ToTokens for ToMessageField<'a> {
 
 pub fn derive(input: DeriveInput) -> Result<TokenStream> {
     let variants = parse_variants(input.clone())?; // TODO(EKF)
-    let variants: Vec<ToMessage> = variants.iter().map(MessageVariant::to_message).collect();
+    let variants: Vec<ToPacket> = variants.iter().map(MessageVariant::to_message).collect();
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
     let name = input.ident;

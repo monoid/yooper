@@ -13,15 +13,15 @@ use syn::{DeriveInput, Result};
 //  }
 // }
 
-struct FromMessage<'a>(&'a MessageVariant);
+struct FromPacket<'a>(&'a MessageVariant);
 
 impl MessageVariant {
-    fn from_message<'a>(&'a self) -> FromMessage<'a> {
-        FromMessage(&self)
+    fn from_message(&self) -> FromPacket {
+        FromPacket(&self)
     }
 }
 
-impl<'a> FromMessage<'a> {
+impl<'a> FromPacket<'a> {
     fn as_from_condition(&self) -> TokenStream {
         let mut tokens = TokenStream::new();
 
@@ -38,7 +38,7 @@ impl<'a> FromMessage<'a> {
     }
 }
 
-impl<'a> ToTokens for FromMessage<'a> {
+impl<'a> ToTokens for FromPacket<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let MessageVariant {
             name,
@@ -46,7 +46,7 @@ impl<'a> ToTokens for FromMessage<'a> {
             fields,
             ..
         } = &self.0;
-        let fields = fields.into_iter().map(|v| VariantMember::from_message(v)); // TODO
+        let fields = fields.iter().map(VariantMember::from_message); // TODO
 
         let cond = self.as_from_condition();
         tokens.extend(quote! {
@@ -62,14 +62,14 @@ impl<'a> ToTokens for FromMessage<'a> {
 }
 
 impl VariantMember {
-    fn from_message<'a>(&'a self) -> FromMessageField<'a> {
-        FromMessageField(&self)
+    fn from_message(&self) -> FromPacketField {
+        FromPacketField(&self)
     }
 }
 
-struct FromMessageField<'a>(&'a VariantMember);
+struct FromPacketField<'a>(&'a VariantMember);
 
-impl<'a> ToTokens for FromMessageField<'a> {
+impl<'a> ToTokens for FromPacketField<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let VariantMember {
             optional,
@@ -94,7 +94,7 @@ impl<'a> ToTokens for FromMessageField<'a> {
 
 pub fn derive(input: DeriveInput) -> Result<TokenStream> {
     let variants = parse_variants(input.clone())?; // TODO(EKF)
-    let variants: Vec<FromMessage> = variants.iter().map(MessageVariant::from_message).collect();
+    let variants: Vec<FromPacket> = variants.iter().map(MessageVariant::from_message).collect();
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
     let name = input.ident;
