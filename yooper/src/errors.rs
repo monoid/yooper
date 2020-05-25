@@ -6,6 +6,7 @@ pub enum Error {
     ParseFailure(String),
     ParseIntError(ParseIntError),
     MissingHeader(&'static str),
+    IncorrectHeader(&'static str),
     IO(std::io::Error),
     Fmt(std::fmt::Error),
     UnknownPacket, // TODO EKF more descriptive

@@ -37,6 +37,7 @@ impl Encoder<Message> for SSDPMessageEncoder {
 
 #[cfg(test)]
 mod tests {
+    use super::super::types::Ext;
     use super::*;
     use crate::tests::constants::*;
 
@@ -53,6 +54,7 @@ mod tests {
             target: "uuid:fcdb9233-a63f-41da-b42c-7cfeb99c8adf".into(),
             unique_service_name: "uuid:fcdb9233-a63f-41da-b42c-7cfeb99c8adf".into(),
 
+            ext: Ext {},
             boot_id: None,
             config_id: None,
             search_port: None,

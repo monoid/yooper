@@ -1,4 +1,5 @@
 mod codec;
+pub(self) mod types;
 
 use crate::{FromPacket, ToPacket};
 pub use codec::SSDPMessageDecoder;
@@ -80,6 +81,8 @@ pub enum Message {
 
         date: Option<String>,
         location: String,
+
+        ext: types::Ext,
 
         #[header("securelocation.upnp.org")]
         secure_location: Option<String>,
