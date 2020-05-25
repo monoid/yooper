@@ -5,33 +5,38 @@ use bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
 
 #[derive(Default)]
-pub struct SSDPMessageDecoder {
-    inner: SSDPDecoder,
+pub struct SSDPMessageCodec {
+    encoder: SSDPEncoder,
+    decoder: SSDPDecoder,
 }
 
-impl Decoder for SSDPMessageDecoder {
-    type Item = Message;
-    type Error = Error;
-
-    fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
-        match self.inner.decode(src) {
-            Err(e) => Err(e),
-            Ok(None) => Ok(None),
-            Ok(Some(v)) => Message::from_packet(&v).map(Some),
+impl SSDPMessageCodec {
+    pub fn new() -> Self {
+        SSDPMessageCodec {
+            encoder: SSDPEncoder {},
+            decoder: SSDPDecoder {},
         }
     }
 }
 
-#[derive(Default)]
-pub struct SSDPMessageEncoder {
-    inner: SSDPEncoder,
-}
-
-impl Encoder<Message> for SSDPMessageEncoder {
+impl Encoder<Message> for SSDPMessageCodec {
     type Error = Error;
 
     fn encode(&mut self, p: Message, dst: &mut BytesMut) -> Result<(), Self::Error> {
-        self.inner.encode(p.to_packet(), dst)
+        self.encoder.encode(p.to_packet(), dst)
+    }
+}
+
+impl Decoder for SSDPMessageCodec {
+    type Item = Message;
+    type Error = Error;
+
+    fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+        match self.decoder.decode(src) {
+            Err(e) => Err(e),
+            Ok(None) => Ok(None),
+            Ok(Some(v)) => Message::from_packet(&v).map(Some),
+        }
     }
 }
 

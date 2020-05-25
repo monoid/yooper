@@ -2,14 +2,14 @@ mod codec;
 pub(self) mod types;
 
 use crate::{FromHeaders, FromPacket, ToHeaders, ToPacket};
-pub use codec::SSDPMessageDecoder;
+pub use codec::SSDPMessageCodec;
 
 #[derive(ToHeaders, FromHeaders, Debug, PartialEq)]
 pub struct MSearch {
     /// Maximum wait time in seconds. shall be greater than or equal to 1 and should
     /// be less than 5 inclusive.
     #[header("cache-control")]
-    pub max_wait: String,
+    pub max_wait: Option<String>,
     /// Field value contains Search Target.
     // TODO: enum
     #[header("st")]
@@ -22,12 +22,15 @@ pub struct MSearch {
     pub user_agent: Option<String>,
     /// control point can request that a device replies to a TCP port on the control point. When this header
     /// is present it identifies the TCP port on which the device can reply to the search.
+    #[header("tcpport.upnp.org")]
     pub tcp_port: Option<u16>,
     /// Specifies the friendly name of the control point. The friendly name is vendor specific.
-    pub friendly_name: String,
+    #[header("cpfn.upnp.org")]
+    pub friendly_name: Option<String>,
     /// uuid of the control point. When the control point is implemented in a UPnP device it is recommended
     /// to use the UDN of the co-located UPnP device. When implemented, all specified requirements for uuid usage
     /// in devices also apply for control points.
+    #[header("cpuuid.upnp.org")]
     pub uuid: Option<String>,
 }
 

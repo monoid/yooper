@@ -1,6 +1,9 @@
 use std::error::Error;
 use std::net::Ipv4Addr;
+
+use futures::stream::StreamExt;
 use tokio::net::UdpSocket;
+use tokio_util::udp::UdpFramed;
 
 // const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 // const OS: &'static str = "linux"; //TODO
@@ -8,8 +11,6 @@ const SSDP_ADDRESS: Ipv4Addr = Ipv4Addr::new(239, 255, 255, 250);
 const SSDP_PORT: u16 = 1900;
 
 const WLAN_IP: Ipv4Addr = Ipv4Addr::new(192, 168, 7, 212);
-
-const MAX_DATAGRAM_SIZE: usize = 65_507;
 
 // M-SEARCH * HTTP/1.1
 //     HOST: 239.255.255.250:1900
@@ -22,7 +23,7 @@ const MAX_DATAGRAM_SIZE: usize = 65_507;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let mut socket = UdpSocket::bind((Ipv4Addr::UNSPECIFIED, SSDP_PORT)).await?;
+    let socket = UdpSocket::bind((Ipv4Addr::UNSPECIFIED, SSDP_PORT)).await?;
     println!("bound on {}:{}", SSDP_ADDRESS, SSDP_PORT);
 
     socket.set_multicast_loop_v4(true)?;
@@ -33,11 +34,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //     .send_to(discovery.as_bytes(), (SSDP_ADDRESS, SSDP_PORT))
     //     .await?;
 
-    let mut data = vec![0u8; MAX_DATAGRAM_SIZE];
+    let mut framed = UdpFramed::new(socket, yooper::SSDPMessageCodec::new());
+
     loop {
-        let len = socket.recv(&mut data).await?;
+        let n = framed.next().await;
         println!("------");
-        println!("{}", String::from_utf8_lossy(&data[..len]));
+        println!("{:#?}", n);
         println!("------");
     }
 }
