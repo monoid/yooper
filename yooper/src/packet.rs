@@ -2,12 +2,10 @@ mod decoder;
 mod encoder;
 
 use std::collections::HashMap;
-use std::convert::TryFrom;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
 
 use crate::errors::Error;
-use crate::message::Message;
 
 pub use yooper_derive::*;
 
@@ -66,29 +64,10 @@ impl Packet {
     }
 }
 
-impl TryFrom<Packet> for Message {
-    type Error = Error;
-
-    fn try_from(value: Packet) -> Result<Self, Self::Error> {
-        match value.typ {
-            PacketType::MSearch => {
-                // TODO: check MAN
-                // let max_wait: u16 = value.header_or_error("mx")?.parse()?;
-                // let target = value.header_or_error("st")?;
-                // let user_agent = value.headers.get("user-agent").map(|v| v.into());
-                // let tcp_port = match value.headers.get("tcpport.upnp.org") {
-                //     Some(p) => Some(p.parse()?),
-                //     None => None,
-                // };
-                // let uuid = value.headers.get("user-agent").map(|v| v.into());
-                unimplemented!()
-            }
-            PacketType::Notify => unimplemented!(),
-            PacketType::Ok => Ok(Message::Unimplemented),
-        }
-    }
-}
-
 pub trait FromPacket: std::marker::Sized {
     fn from_packet(msg: &Packet) -> Result<Self, crate::errors::Error>;
+}
+
+pub trait ToPacket {
+    fn to_packet(&self) -> Packet;
 }

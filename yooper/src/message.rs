@@ -1,6 +1,6 @@
-use crate::FromPacket;
+use crate::{FromPacket, ToPacket};
 
-#[derive(Debug, PartialEq, FromPacket)]
+#[derive(Debug, PartialEq, FromPacket, ToPacket)]
 pub enum Message {
     // #[message(reqline = "MSearch")]
     // MSearch {
@@ -42,6 +42,8 @@ pub enum Message {
         /// Specified  by  UPnP  vendor. Single absolute URL (see RFC 3986)
         location: String,
 
+        host: String,
+
         #[header("securelocation.upnp.org")]
         secure_location: Option<String>,
         // TODO: Enum
@@ -67,17 +69,15 @@ pub enum Message {
         #[header("searchport.upnp.org")]
         search_port: Option<u16>,
     },
-    Unimplemented,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::packet::{FromPacket, Packet, PacketType::*};
+    use crate::packet::{FromPacket, Packet, PacketType::*, ToPacket};
 
-    #[test]
-    fn test_available_from_packet() {
-        let packet = Packet::new_from_literal(
+    fn packet() -> Packet {
+        Packet::new_from_literal(
             Notify,
             vec![("host", "239.255.255.250:1900"),
                  ("cache-control", "max-age=3600"),
@@ -86,22 +86,38 @@ mod tests {
                  ("nts", "ssdp:alive"),
                  ("server","Windows 10/10.0 UPnP/1.0 Azureus/5.7.6.0"),
                  ("usn","uuid:07853410-ccef-9e3c-de6a-410b371182eb::urn:schemas-upnp-org:device:MediaServer:1" ),
-                 ("searchport.upnp.org", "20"),
+                 ("searchport.upnp.org", "11120"),
             ]
-        );
-        let expected = Message::Available {
+        )
+    }
+
+    fn available() -> Message {
+        Message::Available {
             max_age: "max-age=3600".into(),
             location: "http://192.168.7.238:54216/RootDevice.xml".into(),
             notification_type: "urn:schemas-upnp-org:device:MediaServer:1".into(),
             server: "Windows 10/10.0 UPnP/1.0 Azureus/5.7.6.0".into(),
             unique_service_name: "uuid:07853410-ccef-9e3c-de6a-410b371182eb::urn:schemas-upnp-org:device:MediaServer:1".into(),
+            host:  "239.255.255.250:1900".into(),
 
             secure_location: None,
             boot_id: None,
             config_id: None,
-            search_port: Some(20),
-        };
+            search_port: Some(11120),
+        }
+    }
 
+    #[test]
+    fn test_available_from_packet() {
+        let packet = packet();
+        let expected = available();
         assert_eq!(expected, Message::from_packet(&packet).unwrap())
+    }
+
+    #[test]
+    fn test_packet_from_availabe() {
+        let available = available();
+        let expected = packet();
+        assert_eq!(expected, available.to_packet())
     }
 }
