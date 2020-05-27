@@ -5,14 +5,20 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{DeriveInput, Result};
 
-// #[derive(ToMessage)]
+// #[derive(ToMessage, FromMessage)]
 // enum Packet {
 //   #[message(reqline = Notify, nts = "ssdp:alive")]
-//   Alive {
-//     # #[header("ssdpuuid.upnp.org")
+//   Alive (Alive)
+//     #[header("ssdpuuid.upnp.org")
 //     uuid: String
 //   }
 //  }
+// }
+//
+// #[deive(ToHeaders, FromHeaders)]
+// struct Alive {
+//     #[header("ssdpuuid.upnp.org")
+//     uuid: String
 // }
 
 struct FromPacket<'a>(&'a MessageVariant);
