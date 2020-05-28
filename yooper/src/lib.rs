@@ -1,13 +1,4 @@
 mod errors;
-mod message;
-mod packet;
+pub mod ssdp;
 
 pub use errors::Error;
-pub use message::{Message, SSDPMessageCodec};
-pub use packet::{
-    FromHeaders, FromPacket, Headers, Packet, PacketType, SSDPDecoder, SSDPEncoder, ToHeaders,
-    ToPacket,
-};
-
-#[cfg(test)]
-pub mod tests;

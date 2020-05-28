@@ -1,25 +1,26 @@
 use super::Message;
-use crate::{Error, FromPacket, SSDPDecoder, SSDPEncoder, ToPacket};
+use crate::Error;
+use crate::ssdp::packet::{FromPacket, self, ToPacket};
 
 use bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
 
 #[derive(Default)]
-pub struct SSDPMessageCodec {
-    encoder: SSDPEncoder,
-    decoder: SSDPDecoder,
+pub struct Codec {
+    encoder: packet::Encoder,
+    decoder: packet::Decoder,
 }
 
-impl SSDPMessageCodec {
+impl Codec {
     pub fn new() -> Self {
-        SSDPMessageCodec {
-            encoder: SSDPEncoder {},
-            decoder: SSDPDecoder {},
+        Codec {
+            encoder: packet::Encoder {},
+            decoder: packet::Decoder {},
         }
     }
 }
 
-impl Encoder<Message> for SSDPMessageCodec {
+impl Encoder<Message> for Codec {
     type Error = Error;
 
     fn encode(&mut self, p: Message, dst: &mut BytesMut) -> Result<(), Self::Error> {
@@ -27,7 +28,7 @@ impl Encoder<Message> for SSDPMessageCodec {
     }
 }
 
-impl Decoder for SSDPMessageCodec {
+impl Decoder for Codec {
     type Item = Message;
     type Error = Error;
 
@@ -44,12 +45,12 @@ impl Decoder for SSDPMessageCodec {
 mod tests {
     use super::super::{types::Ext, SearchResponse};
     use super::*;
-    use crate::tests::constants::*;
+    use crate::ssdp::tests::constants::*;
 
     #[test]
     fn test_decode_ok() {
         let mut buf = BytesMut::from(SEARCH_RESPONSE_EXAMPLE);
-        let mut decoder = SSDPMessageDecoder::default();
+        let mut decoder = Codec::default();
         let message = Message::SearchResponse(SearchResponse {
             max_age: "max-age=1800".into(),
             date: Some("Mon, 25 May 2020 02:39:02 GMT".into()),

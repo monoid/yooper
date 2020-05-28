@@ -35,7 +35,7 @@ impl<'a> FromPacket<'a> {
 
         let MessageVariant { reqline, nts, .. } = &self.0;
 
-        tokens.extend(quote! { packet.typ == crate::PacketType::#reqline});
+        tokens.extend(quote! { packet.typ == crate::ssdp::packet::PacketType::#reqline});
         if let Some(nts) = nts {
             tokens.extend(quote! {
                 && packet.headers.get("nts").map_or(false, |h| h == #nts )
@@ -126,9 +126,9 @@ pub fn headers(input: DeriveInput) -> Result<TokenStream> {
 
     let tokens = quote! {
         #[automatically_derived]
-        impl #impl_generics crate::FromHeaders for #name #ty_generics #where_clause {
+        impl #impl_generics crate::ssdp::packet::FromHeaders for #name #ty_generics #where_clause {
 
-            fn from_headers(headers: &crate::Headers) -> Result<Self, crate::errors::Error> {
+            fn from_headers(headers: &crate::ssdp::packet::Headers) -> Result<Self, crate::Error> {
                 #headers
             }
         }
@@ -145,8 +145,8 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
 
     let tokens = quote! {
         #[automatically_derived]
-        impl #impl_generics crate::FromPacket for #name #ty_generics #where_clause {
-            fn from_packet(packet: &crate::Packet) -> Result<Self, crate::Error> {
+        impl #impl_generics crate::ssdp::packet::FromPacket for #name #ty_generics #where_clause {
+            fn from_packet(packet: &crate::ssdp::packet::Packet) -> Result<Self, crate::Error> {
                 #(#variants)*;
 
                 Err(crate::Error::UnknownPacket)

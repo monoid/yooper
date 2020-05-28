@@ -1,14 +1,14 @@
 use crate::errors::Error;
 use bytes::BytesMut;
 use std::collections::HashMap;
-use tokio_util::codec::Decoder;
+use tokio_util::codec;
 
 use super::Packet;
 
 #[derive(Default)]
-pub struct SSDPDecoder {}
+pub struct Decoder {}
 
-impl Decoder for SSDPDecoder {
+impl codec::Decoder for Decoder {
     type Item = Packet;
     type Error = Error;
 
@@ -56,16 +56,15 @@ fn split_header(line: &str) -> Result<(String, String), Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::packet::PacketType;
-
-    use crate::tests::constants::*;
+    use tokio_util::codec::Decoder;
+    use bytes::BytesMut;
+    use crate::ssdp::{packet::{Packet, PacketType}, tests::constants::*};
 
     #[test]
     fn test_parse_notify() {
         let mut buf = BytesMut::from(NOTIFY_EXAMPLE);
 
-        let decoded = SSDPDecoder {}.decode(&mut buf).unwrap().unwrap();
+        let decoded = super::Decoder {}.decode(&mut buf).unwrap().unwrap();
         assert_eq!(
             decoded,
             Packet::new_from_literal(
@@ -85,7 +84,7 @@ mod tests {
     #[test]
     fn test_parse_m_search() {
         let mut buf = BytesMut::from(M_SEARCH_EXAMPLE);
-        let decoded = SSDPDecoder {}.decode(&mut buf).unwrap().unwrap();
+        let decoded = super::Decoder {}.decode(&mut buf).unwrap().unwrap();
 
         assert_eq!(
             decoded,
@@ -105,7 +104,7 @@ mod tests {
     #[test]
     fn test_parse_search_response() {
         let mut buf = BytesMut::from(SEARCH_RESPONSE_EXAMPLE);
-        let decoded = SSDPDecoder {}.decode(&mut buf).unwrap().unwrap();
+        let decoded = super::Decoder {}.decode(&mut buf).unwrap().unwrap();
 
         assert_eq!(
             decoded,

@@ -1,5 +1,5 @@
 use super::*;
-use crate::packet::{FromPacket, Packet, PacketType::*, ToPacket};
+use crate::ssdp::packet::{FromPacket, Packet, PacketType::*, ToPacket};
 
 fn available_packet() -> Packet {
     Packet::new_from_literal(

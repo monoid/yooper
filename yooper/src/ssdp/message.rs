@@ -1,8 +1,8 @@
 mod codec;
 pub(self) mod types;
 
-use crate::{FromHeaders, FromPacket, ToHeaders, ToPacket};
-pub use codec::SSDPMessageCodec;
+use crate::ssdp::packet::{FromHeaders, FromPacket, ToHeaders, ToPacket};
+pub use codec::Codec;
 
 #[derive(ToHeaders, FromHeaders, Debug, PartialEq)]
 pub struct MSearch {

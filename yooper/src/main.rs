@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //     .send_to(discovery.as_bytes(), (SSDP_ADDRESS, SSDP_PORT))
     //     .await?;
 
-    let mut framed = UdpFramed::new(socket, yooper::SSDPMessageCodec::new());
+    let mut framed = UdpFramed::new(socket, yooper::ssdp::message::Codec::new());
 
     loop {
         let n = framed.next().await;

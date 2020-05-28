@@ -35,8 +35,8 @@ impl<'a> ToTokens for ToPacket<'a> {
             #parent::#name ( field ) => {
                 let mut headers = field.to_headers();
                 #nts_header
-                crate::Packet {
-                    typ: crate::PacketType::#reqline,
+                crate::ssdp::packet::Packet {
+                    typ: crate::ssdp::packet::PacketType::#reqline,
                     headers,
                 }
             }
@@ -102,8 +102,8 @@ pub fn headers(input: DeriveInput) -> Result<TokenStream> {
     let name = input.ident;
     let tokens = quote! {
         #[automatically_derived]
-        impl #impl_generics crate::ToHeaders for #name #ty_generics #where_clause {
-            fn to_headers(&self) -> crate::Headers {
+        impl #impl_generics crate::ssdp::packet::ToHeaders for #name #ty_generics #where_clause {
+            fn to_headers(&self) -> crate::ssdp::packet::Headers {
                 #headers
             }
         }
@@ -121,8 +121,8 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
 
     let tokens = quote! {
         #[automatically_derived]
-        impl #impl_generics crate::ToPacket for #name #ty_generics #where_clause {
-            fn to_packet(&self) -> crate::Packet {
+        impl #impl_generics crate::ssdp::packet::ToPacket for #name #ty_generics #where_clause {
+            fn to_packet(&self) -> crate::ssdp::packet::Packet {
                 match self {
                     #(#variants)*,
 
