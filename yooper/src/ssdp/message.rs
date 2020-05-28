@@ -4,13 +4,18 @@ pub(self) mod types;
 use crate::ssdp::packet::{FromHeaders, FromPacket, ToHeaders, ToPacket};
 pub use codec::Codec;
 
-#[derive(ToHeaders, FromHeaders, Debug, PartialEq)]
+#[derive(ToHeaders, FromHeaders, Debug, PartialEq, Default)]
 pub struct MSearch {
     /// Maximum wait time in seconds. shall be greater than or equal to 1 and should
     /// be less than 5 inclusive.
     #[header("cache-control")]
     pub max_wait: Option<String>,
     /// Field value contains Search Target.
+
+    pub host: String,
+
+    pub man: types::ManDiscover,
+
     // TODO: enum
     #[header("st")]
     pub target: String,

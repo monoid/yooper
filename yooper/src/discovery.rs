@@ -16,7 +16,8 @@ use futures::sink::SinkExt;
 
 use crate::{
     ssdp::message::{
-        Codec, Message, MSearch
+        Codec, Message, MSearch,
+
     },
     Error,
 };
@@ -67,10 +68,12 @@ impl Discovery {
                 max_wait: Some(secs.to_string()),
                 target: "ssdp:all".into(),
                 user_agent: Some(self.user_agent.clone()),
+                host: format!("{}:{}", SSDP_ADDRESS, SSDP_PORT),
 
-                tcp_port: None,
                 friendly_name: Some("yooper".into()),
                 uuid: Some(self.uuid.to_string()),
+
+                ..Default::default()
             }
         );
 
