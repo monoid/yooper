@@ -1,43 +1,39 @@
+use thiserror::Error;
+
 use std::convert::Infallible;
 use std::num::ParseIntError;
+use mac_address::MacAddressError;
+use uuid;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
+    #[error("Parse failure: {0}")]
     ParseFailure(String),
-    ParseIntError(ParseIntError),
+
+    #[error("couldn't parse integer")]
+    ParseIntError(#[from] ParseIntError),
+
+    #[error("missing required header {0}")]
     MissingHeader(&'static str),
+
+    #[error("Required constant header had incorrect value {0}")]
     IncorrectHeader(&'static str),
-    IO(std::io::Error),
-    Fmt(std::fmt::Error),
+
+    #[error("IO Error {0}")]
+    IO(#[from] std::io::Error),
+
+    #[error("Format Error")]
+    Fmt(#[from]std::fmt::Error),
+
+    #[error("Received a packet we don't understand")]
     UnknownPacket, // TODO EKF more descriptive
-}
 
-impl From<std::io::Error> for Error {
-    fn from(e: std::io::Error) -> Self {
-        Error::IO(e)
-    }
-}
+    #[error("Couldn't discover this computer's MAC address")]
+    MACAddressError(#[from] MacAddressError),
 
-impl From<std::fmt::Error> for Error {
-    fn from(source: std::fmt::Error) -> Self {
-        Error::Fmt(source)
-    }
-}
+    #[error("if you see this, something's wrong")]
+    Infallible(#[from] Infallible),
 
-impl From<&str> for Error {
-    fn from(source: &str) -> Self {
-        Error::ParseFailure(source.into())
-    }
-}
-
-impl From<ParseIntError> for Error {
-    fn from(e: ParseIntError) -> Self {
-        Error::ParseIntError(e)
-    }
-}
-
-impl From<Infallible> for Error {
-    fn from(_: Infallible) -> Self {
-        unreachable!()
-    }
+    #[error("Failed to generate a UUID")]
+    UUID(#[from] uuid::Error),
 }

@@ -89,7 +89,7 @@ pub struct SearchResponse {
 
     #[header("securelocation.upnp.org")]
     pub secure_location: Option<String>,
-    server: String,
+    pub server: String,
 
     // TODO: enum
     #[header("st")]

@@ -8,12 +8,19 @@ edition = "2018"
 bytes = "0.5.4"
 yooper_derive = { path = "../yooper_derive" }
 futures = "0.3"
+mac_address = "1.0"
+thiserror = "1.0"
+os_info = "2.0"
 
 [dependencies.tokio]
 version = "0.2.20"
-features = ["udp", "macros", "rt-threaded"]
+features = ["udp", "macros", "rt-threaded", "time"]
 
 [dependencies.tokio-util]
 version = "0.3.1"
 features = ["udp", "codec"]
 
+
+[dependencies.uuid]
+version = "0.8"
+features = ["v1"]
