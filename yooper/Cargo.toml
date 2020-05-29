@@ -3,6 +3,7 @@ name = "yooper"
 version = "0.1.0"
 authors = ["Ellie Frost <web@stillinbeta.com>"]
 edition = "2018"
+license = "BSD-3-Clause"
 
 [dependencies]
 bytes = "0.5.4"
