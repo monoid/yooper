@@ -1,9 +1,8 @@
 use crate::errors::Error;
 use bytes::BytesMut;
-use std::collections::HashMap;
 use tokio_util::codec;
 
-use super::Packet;
+use super::{Packet, Headers};
 
 #[derive(Default)]
 pub struct Decoder {}
@@ -27,7 +26,7 @@ impl codec::Decoder for Decoder {
 
         let typ = reqline.parse()?;
 
-        let headers: HashMap<String, String> =
+        let headers: Headers =
             iter.map(split_header).collect::<Result<_, Error>>()?;
 
         Ok(Some(Packet { typ, headers }))

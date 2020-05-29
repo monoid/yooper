@@ -87,7 +87,7 @@ impl<'a> ToTokens for ToHeaders<'a> {
         let fields = self.0.fields.iter().map(VariantMember::to_message);
 
         tokens.extend(quote! {
-            let mut headers = std::collections::HashMap::new();
+            let mut headers = crate::ssdp::packet::Headers::new();
             #(#fields)*
             headers
         })

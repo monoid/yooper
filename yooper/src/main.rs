@@ -1,7 +1,7 @@
-use std::error::Error;
-use std::net::Ipv4Addr;
-
-use yooper::discovery::Discovery;
+use yooper::{
+    Error,
+    discovery::Discovery
+};
 
 // const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 // const OS: &'static str = "linux"; //TODO
@@ -16,7 +16,7 @@ use yooper::discovery::Discovery;
 //     CPUUID.UPNP.ORG: uuid of the control point
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<(), Error> {
     let mut discovery = Discovery::new().await?;
 
     for result in discovery.find(5).await? {

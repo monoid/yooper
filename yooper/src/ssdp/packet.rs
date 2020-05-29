@@ -1,7 +1,7 @@
 mod decoder;
 mod encoder;
 
-use std::collections::HashMap;
+use indexmap::IndexMap;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
 
@@ -49,7 +49,7 @@ impl FromStr for PacketType {
     }
 }
 
-pub type Headers = HashMap<String, String>;
+pub type Headers = IndexMap<String, String>;
 
 #[derive(PartialEq, Debug)]
 pub struct Packet {

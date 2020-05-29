@@ -8,6 +8,7 @@ edition = "2018"
 bytes = "0.5.4"
 yooper_derive = { path = "../yooper_derive" }
 futures = "0.3"
+indexmap = "1.3"
 mac_address = "1.0"
 thiserror = "1.0"
 os_info = "2.0"
