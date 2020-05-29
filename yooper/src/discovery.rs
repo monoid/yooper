@@ -70,8 +70,8 @@ impl Discovery {
                 user_agent: Some(self.user_agent.clone()),
                 host: format!("{}:{}", SSDP_ADDRESS, SSDP_PORT),
 
-                friendly_name: None, //Some("yooper".into()),
-                uuid: None, // Some(self.uuid.to_string()),
+                friendly_name: Some("yooper".into()),
+                uuid: Some(self.uuid.to_string()),
 
                 ..Default::default()
             }
