@@ -8,6 +8,7 @@ use std::fmt::Write;
 #[derive(Default)]
 pub struct Encoder {}
 
+/// Turn a an unstructured Packet into a UDP bytestream
 impl codec::Encoder<Packet> for Encoder {
     type Error = Error;
 

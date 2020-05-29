@@ -1,24 +1,20 @@
-use std::net::{Ipv4Addr, SocketAddr};
 use std::collections::HashMap;
+use std::net::{Ipv4Addr, SocketAddr};
 
+use futures::sink::SinkExt;
+use mac_address::{get_mac_address, MacAddressError};
+use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::{
-    select,
     net::UdpSocket,
-    time::{self, Duration},
+    select,
     stream::StreamExt,
+    time::{self, Duration},
 };
 use tokio_util::udp::UdpFramed;
-use uuid::{Uuid, self};
-use mac_address::{get_mac_address, MacAddressError};
-use os_info;
-use std::time::{SystemTime, UNIX_EPOCH};
-use futures::sink::SinkExt;
+use uuid::{self, Uuid};
 
 use crate::{
-    ssdp::message::{
-        Codec, Message, MSearch,
-
-    },
+    ssdp::message::{Codec, MSearch, Message, SearchTarget},
     Error,
 };
 
@@ -27,24 +23,33 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 const SSDP_ADDRESS: Ipv4Addr = Ipv4Addr::new(239, 255, 255, 250);
 const SSDP_PORT: u16 = 1900;
 
+/// Discover services on your network
 pub struct Discovery {
     uuid: Uuid,
     user_agent: String,
     socket: UdpFramed<Codec>,
 }
 
+/// A Device that's responded to a search
 pub struct Device {
+    /// version information for the server that responded to the search
     pub server: String,
+    /// The address the device responded from
     pub address: SocketAddr,
+    /// A list of discovered services
     pub services: Vec<Service>,
 }
 
+/// A Service represents a running service on a device
 pub struct Service {
+    /// Unique Service Name identifies a unique instance of a device or service.
     pub service_name: String,
-    pub target: String,
+    /// the search target you would use to describe this service
+    pub target: SearchTarget,
 }
 
 impl Discovery {
+    /// Create a new Discovery struct, including creating a new socket
     pub async fn new() -> Result<Self, Error> {
         let socket = UdpSocket::bind((Ipv4Addr::UNSPECIFIED, SSDP_PORT)).await?;
         socket.join_multicast_v4(SSDP_ADDRESS, Ipv4Addr::UNSPECIFIED)?;
@@ -53,6 +58,7 @@ impl Discovery {
         Self::from_socket(socket)
     }
 
+    /// Create a new Discovery struct based on an existing Tokio socket
     pub fn from_socket(socket: UdpSocket) -> Result<Self, Error> {
         Ok(Self {
             socket: UdpFramed::new(socket, Codec::new()),
@@ -61,27 +67,31 @@ impl Discovery {
         })
     }
 
+    /// Send out an MSearch packet to discover services
     pub async fn start_search(&mut self, secs: u8) -> Result<(), Error> {
         // TODO: secs should be between 1 and 5
-        let msg = Message::MSearch(
-            MSearch {
-                max_wait: Some(secs),
-                target: "ssdp:all".into(),
-                user_agent: Some(self.user_agent.clone()),
-                host: format!("{}:{}", SSDP_ADDRESS, SSDP_PORT),
+        let msg = Message::MSearch(MSearch {
+            max_wait: Some(secs),
+            target: SearchTarget::All,
+            user_agent: Some(self.user_agent.clone()),
+            host: format!("{}:{}", SSDP_ADDRESS, SSDP_PORT),
 
-                friendly_name: Some("yooper".into()),
-                uuid: Some(self.uuid.to_string()),
+            friendly_name: Some("yooper".into()),
+            uuid: Some(self.uuid.to_string()),
 
-                ..Default::default()
-            }
-        );
+            ..Default::default()
+        });
 
-        self.socket.send((msg, (SSDP_ADDRESS, SSDP_PORT).into())).await?;
+        self.socket
+            .send((msg, (SSDP_ADDRESS, SSDP_PORT).into()))
+            .await?;
 
         Ok(())
     }
 
+    /// Find all SSDP services on the network.
+    /// Will block for n secs then return a list of discovered devices
+    /// secs should be between 1 and 5 to comply with
     pub async fn find(&mut self, secs: u8) -> Result<Vec<Device>, Error> {
         let mut map: HashMap<SocketAddr, Device> = HashMap::new();
         self.start_search(secs).await?;
@@ -89,39 +99,44 @@ impl Discovery {
         let mut delay = time::delay_for(Duration::from_secs(secs.into()));
 
         loop {
-        select!{
-            msg = self.socket.next() => {
-                match msg {
-                    Some(Err(e)) => eprintln!("Error receiving: {:?}", e),
-                    Some(Ok((Message::SearchResponse(sr), address))) => {
-                        let device = map.entry(address).or_insert(Device {
-                            address,
-                            server: sr.server,
-                            services: Vec::new(),
+            select! {
+                msg = self.socket.next() => {
+                    match msg {
+                        Some(Err(e)) => eprintln!("Error receiving: {:?}", e),
+                        Some(Ok((Message::SearchResponse(sr), address))) => {
+                            let device = map.entry(address).or_insert(Device {
+                                address,
+                                server: sr.server,
+                                services: Vec::new(),
 
-                        });
-                        device.services.push(Service{
-                            target: sr.target,
-                            service_name: sr.unique_service_name
-                        })
+                            });
+                            device.services.push(Service{
+                                target: sr.target,
+                                service_name: sr.unique_service_name
+                            })
+                        }
+                        _ => (),
                     }
-                    _ => (),
                 }
-            }
-            _ = &mut delay => {
-                break
-            }
-        };
+                _ = &mut delay => {
+                    break
+                }
+            };
         }
 
-        Ok(map.into_iter().map(|(_k, v)| v ).collect())
+        Ok(map.into_iter().map(|(_k, v)| v).collect())
     }
 }
 
 fn user_agent() -> String {
     let info = os_info::get();
 
-    format!("{}/{}.1 upnp/2.0 yooper/{}", info.os_type(), info.version(), VERSION)
+    format!(
+        "{}/{}.1 upnp/2.0 yooper/{}",
+        info.os_type(),
+        info.version(),
+        VERSION
+    )
 }
 
 fn get_uuid() -> Result<Uuid, Error> {
@@ -132,7 +147,11 @@ fn get_uuid() -> Result<Uuid, Error> {
     let since_the_epoch = start
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards");
-    let ts = uuid::v1::Timestamp::from_unix(&ctx, since_the_epoch.as_secs(), since_the_epoch.subsec_nanos());
+    let ts = uuid::v1::Timestamp::from_unix(
+        &ctx,
+        since_the_epoch.as_secs(),
+        since_the_epoch.subsec_nanos(),
+    );
 
     Ok(uuid::Uuid::new_v1(ts, &mac.bytes())?)
 }

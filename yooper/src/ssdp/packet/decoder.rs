@@ -2,8 +2,9 @@ use crate::errors::Error;
 use bytes::BytesMut;
 use tokio_util::codec;
 
-use super::{Packet, Headers};
+use super::{Headers, Packet};
 
+/// Turn a UDP packet into an unstructured Packet
 #[derive(Default)]
 pub struct Decoder {}
 
@@ -26,8 +27,7 @@ impl codec::Decoder for Decoder {
 
         let typ = reqline.parse()?;
 
-        let headers: Headers =
-            iter.map(split_header).collect::<Result<_, Error>>()?;
+        let headers: Headers = iter.map(split_header).collect::<Result<_, Error>>()?;
 
         Ok(Some(Packet { typ, headers }))
     }
@@ -55,9 +55,12 @@ fn split_header(line: &str) -> Result<(String, String), Error> {
 
 #[cfg(test)]
 mod tests {
-    use tokio_util::codec::Decoder;
+    use crate::ssdp::{
+        packet::{Packet, PacketType},
+        tests::constants::*,
+    };
     use bytes::BytesMut;
-    use crate::ssdp::{packet::{Packet, PacketType}, tests::constants::*};
+    use tokio_util::codec::Decoder;
 
     #[test]
     fn test_parse_notify() {

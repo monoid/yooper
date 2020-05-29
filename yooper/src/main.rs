@@ -1,7 +1,4 @@
-use yooper::{
-    Error,
-    discovery::Discovery
-};
+use yooper::{discovery::Discovery, Error};
 
 // const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 // const OS: &'static str = "linux"; //TODO
@@ -22,9 +19,8 @@ async fn main() -> Result<(), Error> {
     for result in discovery.find(5).await? {
         println!("{} at {}", result.server, result.address);
         for service in result.services {
-            println!("∟ {}", service.target)
+            println!("∟ {:?}", service.target)
         }
-
     }
     Ok(())
 }

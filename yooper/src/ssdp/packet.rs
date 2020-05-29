@@ -1,24 +1,21 @@
+//! Packet is an unstructured intermediate representation of an SSDP UDP packet
 mod decoder;
 mod encoder;
 
 use indexmap::IndexMap;
-use std::net::Ipv4Addr;
 use std::str::FromStr;
 
 use crate::Error;
 
 pub use decoder::Decoder;
 pub use encoder::Encoder;
-pub use yooper_derive::{FromPacket, ToPacket, FromHeaders, ToHeaders};
+pub use yooper_derive::{FromHeaders, FromPacket, ToHeaders, ToPacket};
 
-pub(crate) const REQUEST_LINE_NOTIFY: &str = "NOTIFY * HTTP/1.1";
-pub(crate) const REQUEST_LINE_M_SEARCH: &str = "M-SEARCH * HTTP/1.1";
-pub(crate) const REQUEST_LINE_OK: &str = "HTTP/1.1 200 OK";
-#[allow(dead_code)]
-pub(crate) const SSDP_ADDRESS: Ipv4Addr = Ipv4Addr::new(239, 255, 255, 250);
-#[allow(dead_code)]
-pub(crate) const SSDP_PORT: u16 = 1900;
+const REQUEST_LINE_NOTIFY: &str = "NOTIFY * HTTP/1.1";
+const REQUEST_LINE_M_SEARCH: &str = "M-SEARCH * HTTP/1.1";
+const REQUEST_LINE_OK: &str = "HTTP/1.1 200 OK";
 
+/// The Request line of the packet
 #[derive(PartialEq, Debug)]
 pub enum PacketType {
     MSearch,
@@ -49,11 +46,15 @@ impl FromStr for PacketType {
     }
 }
 
+/// records, in order, the headers for the packet
 pub type Headers = IndexMap<String, String>;
 
+/// A single SSDP packet
 #[derive(PartialEq, Debug)]
 pub struct Packet {
+    /// The request line of a packet
     pub typ: PacketType,
+    /// The headers from the packet
     pub headers: Headers,
 }
 
@@ -68,10 +69,12 @@ impl Packet {
     }
 }
 
+/// Deserialize a packet into something more structured
 pub trait FromPacket: std::marker::Sized {
     fn from_packet(msg: &Packet) -> Result<Self, crate::errors::Error>;
 }
 
+/// Serialize a structured representation into a packet
 pub trait ToPacket {
     fn to_packet(&self) -> Packet;
 }

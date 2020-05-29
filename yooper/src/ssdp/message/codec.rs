@@ -1,10 +1,11 @@
 use super::Message;
+use crate::ssdp::packet::{self, FromPacket, ToPacket};
 use crate::Error;
-use crate::ssdp::packet::{FromPacket, self, ToPacket};
 
 use bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
 
+/// A codec for turning udp packets into decoded Messages
 #[derive(Default)]
 pub struct Codec {
     encoder: packet::Encoder,
