@@ -6,17 +6,21 @@ pub use codec::Codec;
 
 #[derive(ToHeaders, FromHeaders, Debug, PartialEq, Default)]
 pub struct MSearch {
+    pub host: String,
+
     /// Maximum wait time in seconds. shall be greater than or equal to 1 and should
     /// be less than 5 inclusive.
     #[header("cache-control")]
-    pub max_wait: Option<String>,
-    /// Field value contains Search Target.
+    pub cache_control: Option<String>,
 
-    pub host: String,
+    #[header("mx")]
+    pub max_wait: Option<u8>,
+
 
     pub man: types::ManDiscover,
 
     // TODO: enum
+    /// Field value contains Search Target.
     #[header("st")]
     pub target: String,
     /// Field value shall begin with the following “product tokens” (defined
@@ -41,6 +45,8 @@ pub struct MSearch {
 
 #[derive(ToHeaders, FromHeaders, Debug, PartialEq)]
 pub struct Available {
+    pub host: String,
+
     /// after this duration, control points should assume the device (or
     /// service)  is  no  longer  available;  as  long  as  a  control  point
     /// has  received  at  least  one  advertisement  that  is  still  valid
@@ -54,7 +60,6 @@ pub struct Available {
     /// Specified  by  UPnP  vendor. Single absolute URL (see RFC 3986)
     pub location: String,
 
-    pub host: String,
 
     #[header("securelocation.upnp.org")]
     pub secure_location: Option<String>,

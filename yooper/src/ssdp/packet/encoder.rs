@@ -16,7 +16,7 @@ impl codec::Encoder<Packet> for Encoder {
         write!(dst, "{}\r\n", p.typ.to_string())?;
         p.headers
             .iter()
-            .map(|(k, v)| write!(dst, "{}: {}\r\n", k, v))
+            .map(|(k, v)| write!(dst, "{}: {}\r\n", k.to_uppercase(), v))
             .collect::<Result<(), std::fmt::Error>>()?;
         write!(dst, "\r\n")?;
         Ok(())

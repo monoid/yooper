@@ -22,7 +22,7 @@ use crate::{
     Error,
 };
 
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 const SSDP_ADDRESS: Ipv4Addr = Ipv4Addr::new(239, 255, 255, 250);
 const SSDP_PORT: u16 = 1900;
@@ -61,17 +61,17 @@ impl Discovery {
         })
     }
 
-    pub async fn start_search(&mut self, secs: u16) -> Result<(), Error> {
+    pub async fn start_search(&mut self, secs: u8) -> Result<(), Error> {
         // TODO: secs should be between 1 and 5
         let msg = Message::MSearch(
             MSearch {
-                max_wait: Some(secs.to_string()),
+                max_wait: Some(secs),
                 target: "ssdp:all".into(),
                 user_agent: Some(self.user_agent.clone()),
                 host: format!("{}:{}", SSDP_ADDRESS, SSDP_PORT),
 
-                friendly_name: Some("yooper".into()),
-                uuid: Some(self.uuid.to_string()),
+                friendly_name: None, //Some("yooper".into()),
+                uuid: None, // Some(self.uuid.to_string()),
 
                 ..Default::default()
             }
@@ -82,7 +82,7 @@ impl Discovery {
         Ok(())
     }
 
-    pub async fn find(&mut self, secs: u16) -> Result<Vec<Device>, Error> {
+    pub async fn find(&mut self, secs: u8) -> Result<Vec<Device>, Error> {
         let mut map: HashMap<SocketAddr, Device> = HashMap::new();
         self.start_search(secs).await?;
 
