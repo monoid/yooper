@@ -1,0 +1,11 @@
+image: ubuntu/lts
+packages:
+  - curl
+sources:
+  - https://git.sr.ht/~liz/yooper
+tasks:
+  - rustup: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly    
+  - test: |
+        cd yooper
+        $HOME/.cargo/bin/cargo test

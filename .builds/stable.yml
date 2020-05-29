@@ -1,0 +1,14 @@
+image: ubuntu/lts
+packages:
+  - curl
+sources:
+  - https://git.sr.ht/~liz/yooper
+tasks:
+  - rustup: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y -c clippy    
+  - test: |
+        cd yooper
+        $HOME/.cargo/bin/cargo test --workspace
+  - clippy: |
+        cd yooper
+        $HOME/.cargo/bin/cargo clippy --workspace --all-targets --all-features -- -D warnings
