@@ -14,7 +14,7 @@ use tokio_util::udp::UdpFramed;
 use uuid::{self, Uuid};
 
 use crate::{
-    ssdp::message::{Codec, MSearch, Message, SearchTarget},
+    ssdp::message::{Codec, MSearch, Message, SearchTarget, UniqueServiceName},
     Error,
 };
 
@@ -38,12 +38,14 @@ pub struct Device {
     pub address: SocketAddr,
     /// A list of discovered services
     pub services: Vec<Service>,
+    /// the location to retrieve more service information
+    pub location: String,
 }
 
 /// A Service represents a running service on a device
 pub struct Service {
     /// Unique Service Name identifies a unique instance of a device or service.
-    pub service_name: String,
+    pub service_name: UniqueServiceName,
     /// the search target you would use to describe this service
     pub target: SearchTarget,
 }
@@ -93,7 +95,7 @@ impl Discovery {
     /// Will block for n secs then return a list of discovered devices
     /// secs should be between 1 and 5 to comply with
     pub async fn find(&mut self, secs: u8) -> Result<Vec<Device>, Error> {
-        let mut map: HashMap<SocketAddr, Device> = HashMap::new();
+        let mut map: HashMap<String, Device> = HashMap::new();
         self.start_search(secs).await?;
 
         let mut delay = time::delay_for(Duration::from_secs(secs.into()));
@@ -104,16 +106,16 @@ impl Discovery {
                     match msg {
                         Some(Err(e)) => eprintln!("Error receiving: {:?}", e),
                         Some(Ok((Message::SearchResponse(sr), address))) => {
-                            let device = map.entry(address).or_insert(Device {
-                                address,
+                            let uuid = sr.unique_service_name.uuid.clone();
+                            map.entry(uuid).or_insert(Device{
                                 server: sr.server,
+                                address,
                                 services: Vec::new(),
-
-                            });
-                            device.services.push(Service{
+                                location: sr.secure_location.unwrap_or(sr.location),
+                            }).services.push(Service{
                                 target: sr.target,
-                                service_name: sr.unique_service_name
-                            })
+                                service_name: sr.unique_service_name,
+                            });
                         }
                         _ => (),
                     }

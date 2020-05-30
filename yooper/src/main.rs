@@ -17,7 +17,7 @@ async fn main() -> Result<(), Error> {
     let mut discovery = Discovery::new().await?;
 
     for result in discovery.find(5).await? {
-        println!("{} at {}", result.server, result.address);
+        println!("{} at {}", result.server, result.location);
         for service in result.services {
             println!("∟ {:?}", service.target)
         }

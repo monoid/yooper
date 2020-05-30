@@ -6,7 +6,7 @@ pub(self) mod types;
 use crate::ssdp::packet::{FromHeaders, FromPacket, ToHeaders, ToPacket};
 pub use codec::Codec;
 
-pub use types::SearchTarget;
+pub use types::{SearchTarget, UniqueServiceName};
 
 #[derive(ToHeaders, FromHeaders, Debug, PartialEq, Default)]
 pub struct MSearch {
@@ -25,7 +25,7 @@ pub struct MSearch {
     // TODO: enum
     /// Field value contains Search Target.
     #[header("st")]
-    pub target: types::SearchTarget,
+    pub target: SearchTarget,
     /// Field value shall begin with the following “product tokens” (defined
     /// by HTTP/1.1). The first product token identifes the operating system in the form OS name/OS version, the
     /// second token represents the UPnP version and shall be UPnP/2.0, and the third token identifes the product
@@ -62,9 +62,9 @@ pub struct Available {
 
     #[header("securelocation.upnp.org")]
     pub secure_location: Option<String>,
-    // TODO: Enum
+
     #[header("nt")]
-    pub notification_type: String,
+    pub notification_type: SearchTarget,
     /// Field  value  shall begin  with  the  following  “product  tokens”
     /// (defined by HTTP/1.1). The first product token identifes the operating
     /// system in the form OSname/OSversion, the  second  token  represents
@@ -73,9 +73,8 @@ pub struct Available {
     pub server: String,
 
     /// Identifies a unique instance of a device or service.
-    // TODO: Enum
     #[header("usn")]
-    pub unique_service_name: String,
+    pub unique_service_name: UniqueServiceName,
     /// presents the boot instance of the device expressed according to a monotonically increasing value.
     #[header("bootid.upnp.org")]
     pub boot_id: Option<i32>,
@@ -114,9 +113,8 @@ pub struct SearchResponse {
     pub target: types::SearchTarget,
 
     /// A unique service name for this particular service
-    // TODO: Enum
     #[header("usn")]
-    pub unique_service_name: String,
+    pub unique_service_name: UniqueServiceName,
 
     /// presents the boot instance of the device expressed according to a monotonically increasing value.
     #[header("bootid.upnp.org")]

@@ -40,7 +40,7 @@ impl FromStr for ManDiscover {
 }
 
 /// What kind of control point to search for
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Hash, Clone)]
 pub enum SearchTarget {
     /// Search for all devices and services
     All,
@@ -144,5 +144,43 @@ impl FromStr for SearchTarget {
 impl Default for SearchTarget {
     fn default() -> Self {
         Self::All
+    }
+}
+
+#[derive(Default, PartialEq, Debug, Hash, Clone)]
+pub struct UniqueServiceName {
+    pub uuid: String,
+    pub search_target: Option<SearchTarget>,
+}
+
+impl FromStr for UniqueServiceName {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.split("::").collect::<Vec<&str>>().as_slice() {
+            [urn, st] if urn.starts_with("uuid:") => {
+                let uuid = urn[5..].to_string();
+                st.parse().map(|st| UniqueServiceName {
+                    uuid,
+                    search_target: Some(st),
+                })
+            }
+            [urn] if urn.starts_with("uuid:") => Ok(UniqueServiceName {
+                uuid: urn[5..].to_string(),
+                search_target: None,
+            }),
+            _ => Err(Error::MalformedHeader("usn", s.to_owned())),
+        }
+    }
+}
+
+impl ToString for UniqueServiceName {
+    fn to_string(&self) -> String {
+        let out = format!("uuid:{}", self.uuid);
+        if let Some(st) = &self.search_target {
+            format!("{}::{}", out, st.to_string())
+        } else {
+            out
+        }
     }
 }
