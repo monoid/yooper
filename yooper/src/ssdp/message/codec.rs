@@ -44,7 +44,10 @@ impl Decoder for Codec {
 
 #[cfg(test)]
 mod tests {
-    use super::super::{types::Ext, SearchResponse};
+    use super::super::{
+        types::{Ext, SearchTarget, UniqueServiceName},
+        SearchResponse,
+    };
     use super::*;
     use crate::ssdp::tests::constants::*;
 
@@ -58,8 +61,11 @@ mod tests {
             location: "http://192.168.7.1:1900/igd.xml".into(),
             secure_location: None,
             server: "eeroOS/latest UPnP/1.0 eero/latest".into(),
-            target: "uuid:fcdb9233-a63f-41da-b42c-7cfeb99c8adf".into(),
-            unique_service_name: "uuid:fcdb9233-a63f-41da-b42c-7cfeb99c8adf".into(),
+            target: SearchTarget::UUID("fcdb9233-a63f-41da-b42c-7cfeb99c8adf".parse().unwrap()),
+            unique_service_name: UniqueServiceName {
+                uuid: "fcdb9233-a63f-41da-b42c-7cfeb99c8adf".into(),
+                search_target: None,
+            },
 
             ext: Ext {},
             boot_id: None,
