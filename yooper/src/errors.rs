@@ -21,6 +21,9 @@ pub enum Error {
     #[error("Header {0} had a value we couldn't parse ({1})")]
     MalformedHeader(&'static str, String),
 
+    #[error("Field {0} had a value we couldn't parse ({1})")]
+    MalformedField(&'static str, String),
+
     #[error("IO Error {0}")]
     IO(#[from] std::io::Error),
 

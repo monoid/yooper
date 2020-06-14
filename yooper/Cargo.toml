@@ -5,6 +5,11 @@ authors = ["Ellie Frost <web@stillinbeta.com>"]
 edition = "2018"
 license = "BSD-3-Clause"
 
+[features]
+default = ["description"]
+description = ["serde", "serde-xml-rs", "serde_with"]
+
+
 [dependencies]
 bytes = "0.5.4"
 yooper_derive = { path = "../yooper_derive" }
@@ -26,3 +31,16 @@ features = ["udp", "codec"]
 [dependencies.uuid]
 version = "0.8"
 features = ["v1"]
+
+[dependencies.serde]
+version = "1.0"
+optional = true
+features = ["derive"]
+
+[dependencies.serde-xml-rs]
+version = "0.4"
+optional = true
+
+[dependencies.serde_with]
+version = "1.4"
+optional = true
