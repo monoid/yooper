@@ -1,4 +1,4 @@
-//! A set of libraries for working with SSDP, the service discovery portion of UPnP
+//! A library for working with SSDP, the service discovery portion of UPnP
 pub mod message;
 pub mod packet;
 

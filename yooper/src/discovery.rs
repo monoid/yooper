@@ -1,3 +1,6 @@
+//! Discovery is the the first step of UPnP.
+//! Using multicast, ask all devices on the network to announce themselves.
+//! From this list, you can then [Describe them](../description) to find out more about their capabilities
 use std::collections::HashMap;
 use std::net::{Ipv4Addr, SocketAddr};
 
