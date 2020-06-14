@@ -119,22 +119,22 @@ impl FromStr for SearchTarget {
             ["upnp", "rootdevice"] => RootDevice,
             ["uuid", uuid] => UUID(uuid::Uuid::parse_str(uuid)?),
             ["urn", "schemas-upnp-org", "device", dt, v] => Device {
-                device_type: dt.to_string(),
-                version: v.to_string(),
+                device_type: (*dt).to_string(),
+                version: (*v).to_string(),
             },
             ["urn", "schemas-upnp-org", "service", st, v] => Service {
-                service_type: st.to_string(),
-                version: v.to_string(),
+                service_type: (*st).to_string(),
+                version: (*v).to_string(),
             },
             ["urn", dn, "device", dt, v] => VendorDevice {
-                domain_name: dn.to_string(),
-                device_type: dt.to_string(),
-                version: v.to_string(),
+                domain_name: (*dn).to_string(),
+                device_type: (*dt).to_string(),
+                version: (*v).to_string(),
             },
             ["urn", dn, "service", st, v] => VendorService {
-                domain_name: dn.to_string(),
-                service_type: st.to_string(),
-                version: v.to_string(),
+                domain_name: (*dn).to_string(),
+                service_type: (*st).to_string(),
+                version: (*v).to_string(),
             },
             _ => Other(s.to_owned()),
         })

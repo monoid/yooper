@@ -7,8 +7,7 @@ license = "BSD-3-Clause"
 
 [features]
 default = ["description"]
-description = ["serde", "serde-xml-rs", "serde_with"]
-
+description = ["reqwest", "serde", "serde_with", "serde-xml-rs"]
 
 [dependencies]
 bytes = "0.5.4"
@@ -43,4 +42,8 @@ optional = true
 
 [dependencies.serde_with]
 version = "1.4"
+optional = true
+
+[dependencies.reqwest]
+version = "0.10"
 optional = true

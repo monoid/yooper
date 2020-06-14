@@ -1,5 +1,6 @@
 use super::*;
 
+// Harvested from my wireless router
 const IGD_EXAMPLE: &str = include_str!("testdata/igd.xml");
 
 #[test]

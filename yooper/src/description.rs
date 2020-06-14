@@ -33,14 +33,14 @@ impl FromStr for DeviceType {
         match s.split(':').collect::<Vec<&str>>().as_slice() {
             ["urn", "schemas-upnp-org", "device", device_type, version] => Ok(Self {
                 vendor_domain: None,
-                device_type: device_type.to_string(),
-                version: version.to_string(),
+                device_type: (*device_type).to_owned(),
+                version: (*version).to_owned(),
             }),
 
             ["urn", vendor_domain, "device", device_id, version] => Ok(Self {
-                vendor_domain: Some(vendor_domain.to_string()),
-                device_type: device_id.to_string(),
-                version: version.to_string(),
+                vendor_domain: Some((*vendor_domain).to_owned()),
+                device_type: (*device_id).to_owned(),
+                version: (*version).to_owned(),
             }),
             _ => Err(Error::MalformedField("service_id", s.to_owned())),
         }
@@ -61,14 +61,14 @@ impl FromStr for ServiceType {
         match s.split(':').collect::<Vec<&str>>().as_slice() {
             ["urn", "schemas-upnp-org", "service", device_type, version] => Ok(Self {
                 vendor_domain: None,
-                service_type: device_type.to_string(),
-                version: version.to_string(),
+                service_type: (*device_type).to_string(),
+                version: (*version).to_string(),
             }),
 
             ["urn", vendor_domain, "service", service_id, version] => Ok(Self {
-                vendor_domain: Some(vendor_domain.to_string()),
-                service_type: service_id.to_string(),
-                version: version.to_string(),
+                vendor_domain: Some((*vendor_domain).to_string()),
+                service_type: (*service_id).to_string(),
+                version: (*version).to_string(),
             }),
             _ => Err(Error::MalformedField("service_id", s.to_owned())),
         }
@@ -88,12 +88,12 @@ impl FromStr for ServiceId {
         match s.split(':').collect::<Vec<&str>>().as_slice() {
             ["urn", "upnp-org", "serviceId", service_id] => Ok(Self {
                 vendor_domain: None,
-                service_id: service_id.to_string(),
+                service_id: (*service_id).to_string(),
             }),
 
             ["urn", vendor_domain, "serviceId", service_id] => Ok(Self {
-                vendor_domain: Some(vendor_domain.to_string()),
-                service_id: service_id.to_string(),
+                vendor_domain: Some((*vendor_domain).to_string()),
+                service_id: (*service_id).to_string(),
             }),
             _ => Err(Error::MalformedField("service_id", s.to_owned())),
         }
@@ -178,11 +178,6 @@ pub struct Service {
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
-pub struct DescriptionDocument {
-    pub root: Description,
-}
-
-#[derive(Debug, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Description {
     pub config_id: Option<String>,
@@ -220,4 +215,11 @@ where
     D: Deserializer<'de>,
 {
     DeviceOuter::deserialize(d).map(|d| d.device)
+}
+
+pub async fn describe(location: String) -> Result<Device, Error> {
+    let body = reqwest::get(&location).await?.text().await?;
+
+    let document: Description = serde_xml_rs::from_str(&body)?;
+    Ok(document.device)
 }

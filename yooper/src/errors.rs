@@ -41,4 +41,10 @@ pub enum Error {
 
     #[error("Failed to generate a UUID")]
     UUID(#[from] uuid::Error),
+
+    #[error("Couldn't retrieve over http ({0})")]
+    HTTPError(#[from] reqwest::Error),
+
+    #[error("Couldn't parse an XML document: {0}")]
+    XMLError(#[from] serde_xml_rs::Error),
 }
