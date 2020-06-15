@@ -68,15 +68,18 @@ mod describe {
         })
     }
 
-    fn print_device(device: Device, indent: u8) {
-        let prefix = if indent == 0 {
+    fn get_prefix(indent: u8) -> String {
+        if indent == 0 {
             "".into()
         } else {
-            format!("{}∟ ", "".repeat((indent - 1).into()))
-        };
+            format!("{}∟ ", " ".repeat((2 * indent - 1).into()))
+        }
+    }
+
+    fn print_device(device: Device, indent: u8) {
         println!(
-            "{}{}{}:{}",
-            prefix,
+            "{}D {}{}:{}",
+            get_prefix(indent),
             device
                 .device_type
                 .vendor_domain
@@ -86,8 +89,8 @@ mod describe {
         );
         for svc in device.services {
             println!(
-                "{}{}{}:{} -> {}",
-                prefix,
+                "{}S {}{}:{} -> {}",
+                get_prefix(indent + 1),
                 svc.service_type
                     .vendor_domain
                     .map_or("".into(), |v| format!("{}: ", v)),
