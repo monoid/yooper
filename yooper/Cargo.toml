@@ -1,9 +1,14 @@
 [package]
 name = "yooper"
 version = "0.1.0"
-authors = ["Ellie Frost <web@stillinbeta.com>"]
+authors = ["Liz Frost <web@stillinbeta.com>"]
 edition = "2018"
 license = "BSD-3-Clause"
+repository = "https://git.sr.ht/~liz/yooper/"
+categories = ["command-line-utilities", "network-programming", "api-bindings"]
+readme = "README.md"
+description = "An async UPnP library and CLI"
+keywords = ["upnp"]
 
 [features]
 default = ["description", "cli"]
@@ -12,7 +17,7 @@ cli = ["clap"]
 
 [dependencies]
 bytes = "0.5.4"
-yooper_derive = { path = "../yooper_derive" }
+yooper_derive = { version = "=0.1.0", path = "../yooper_derive" }
 futures = "0.3"
 indexmap = "1.3"
 mac_address = "1.0"
