@@ -1,5 +1,8 @@
 # Yooper
 [![builds.sr.ht status](https://builds.sr.ht/~liz/yooper/stable.yml.svg)](https://builds.sr.ht/~liz/yooper/stable.yml?)
+[![Crates.io](https://img.shields.io/crates/v/yooper)](https://crates.io/crates/yooper)
+[![Documentation](https://docs.rs/yooper/badge.svg)](https://docs.rs/crate/yooper)
+
 _yooper: A person from Michigan's Upper Peninsula_
 
 Yooper is a crate for interacting with UPnP. There's both a CLI and a programatic interface.
