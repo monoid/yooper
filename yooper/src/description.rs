@@ -12,9 +12,9 @@ use std::str::FromStr;
 #[derive(PartialEq, Debug)]
 pub struct DeviceType {
     /// Will be None for standard devices specified by the UPnP Forum.
-    vendor_domain: Option<String>,
-    device_type: String,
-    version: String,
+    pub vendor_domain: Option<String>,
+    pub device_type: String,
+    pub version: String,
 }
 
 impl ToString for DeviceType {
@@ -54,9 +54,9 @@ impl FromStr for DeviceType {
 #[derive(Debug, PartialEq)]
 pub struct ServiceType {
     /// Will be None for standard services specified by the UPnP Forum.
-    vendor_domain: Option<String>,
-    service_type: String,
-    version: String,
+    pub vendor_domain: Option<String>,
+    pub service_type: String,
+    pub version: String,
 }
 
 impl FromStr for ServiceType {
@@ -246,8 +246,8 @@ where
 
 /// Retrieve and parse a device description.
 /// See the location field from [discovery::Device](../discovery/struct.Device.html#structfield.location).
-pub async fn describe(location: String) -> Result<Device, Error> {
-    let body = reqwest::get(&location).await?.text().await?;
+pub async fn describe(location: &str) -> Result<Device, Error> {
+    let body = reqwest::get(location).await?.text().await?;
 
     let document: Description = serde_xml_rs::from_str(&body)?;
     Ok(document.device)

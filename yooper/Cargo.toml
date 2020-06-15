@@ -6,8 +6,9 @@ edition = "2018"
 license = "BSD-3-Clause"
 
 [features]
-default = ["description"]
+default = ["description", "cli"]
 description = ["reqwest", "serde", "serde_with", "serde-xml-rs"]
+cli = ["clap"]
 
 [dependencies]
 bytes = "0.5.4"
@@ -46,4 +47,8 @@ optional = true
 
 [dependencies.reqwest]
 version = "0.10"
+optional = true
+
+[dependencies.clap]
+version = "2.33"
 optional = true
