@@ -19,7 +19,7 @@ impl codec::Decoder for Decoder {
         };
 
         let buf = src.split_to(end);
-        let bufstr = String::from_utf8_lossy(&buf[..buf.len() - 2]); // leave off last `\r\n`
+        let bufstr = String::from_utf8_lossy(&buf[..buf.len() - MSG_END.len()]); // leave off last double `\r\n`
         let mut iter = bufstr.split("\r\n");
         let reqline = iter
             .next()
@@ -36,10 +36,10 @@ impl codec::Decoder for Decoder {
 const MSG_END: [u8; 4] = [b'\r', b'\n', b'\r', b'\n'];
 
 fn find_end(src: &BytesMut) -> Option<usize> {
-    src.windows(4)
+    src.windows(MSG_END.len())
         .enumerate()
         .find(|(_, win)| win == &MSG_END)
-        .map(|(i, _)| i + 2) // include the trailing \r\n
+        .map(|(i, _)| i + MSG_END.len()) // include the trailing \r\n
 }
 
 fn split_header(line: &str) -> Result<(String, String), Error> {
@@ -81,6 +81,7 @@ mod tests {
                 ]
             )
         );
+        assert_eq!(buf.len(), 0);
     }
 
     #[test]
@@ -100,7 +101,8 @@ mod tests {
                     ("user-agent", "Chromium/81.0.4044.138 Linux"),
                 ],
             )
-        )
+        );
+        assert_eq!(buf.len(), 0);
     }
 
     #[test]
@@ -122,6 +124,7 @@ mod tests {
                     ("usn", "uuid:fcdb9233-a63f-41da-b42c-7cfeb99c8adf")
                 ],
             )
-        )
+        );
+        assert_eq!(buf.len(), 0);
     }
 }

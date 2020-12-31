@@ -16,7 +16,7 @@ description = ["reqwest", "serde", "serde_with", "serde-xml-rs"]
 cli = ["clap"]
 
 [dependencies]
-bytes = "0.5.4"
+bytes = "1.0.0"
 yooper_derive = { version = "=0.1.0", path = "../yooper_derive" }
 futures = "0.3"
 indexmap = "1.3"
@@ -25,13 +25,16 @@ thiserror = "1.0"
 os_info = "2.0"
 
 [dependencies.tokio]
-version = "0.2.20"
-features = ["udp", "macros", "rt-threaded", "time"]
+version = "^1.0.1"
+features = ["net", "macros", "rt", "time", "rt-multi-thread"]
 
 [dependencies.tokio-util]
-version = "0.3.1"
-features = ["udp", "codec"]
+version = "0.6.0"
+features = ["net", "codec"]
 
+
+[dependencies.tokio-stream]
+version = "0.1.0"
 
 [dependencies.uuid]
 version = "0.8"
@@ -51,7 +54,7 @@ version = "1.4"
 optional = true
 
 [dependencies.reqwest]
-version = "0.10"
+version = "0.11"
 optional = true
 default-features = false
 

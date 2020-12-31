@@ -9,10 +9,10 @@ use mac_address::{get_mac_address, MacAddressError};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::{
     net::UdpSocket,
-    select,
-    stream::StreamExt,
+    pin, select,
     time::{self, Duration},
 };
+use tokio_stream::StreamExt;
 use tokio_util::udp::UdpFramed;
 use uuid::{self, Uuid};
 
@@ -101,7 +101,8 @@ impl Discovery {
         let mut map: HashMap<String, Device> = HashMap::new();
         self.start_search(secs).await?;
 
-        let mut delay = time::delay_for(Duration::from_secs(secs.into()));
+        let delay = time::sleep(Duration::from_secs(secs.into()));
+        pin!(delay);
 
         loop {
             select! {
